@@ -2,14 +2,23 @@
 
 {% block body %}
 {% load crispy_forms_tags %}
-<div class="row"><!--Start of row-->
-    <div class="col-sm-5"><!--Start of col-->
-       <div class="display_table">
-         <form method='POST' action=''>{% csrf_token %}
-           {{form|crispy}}
-           <input class="btn btn-primary" type="submit" value='Save'/>
-         </form>
-       </div>
-    </div><!--End of col-->
-</div><!--End of row-->
+
+
+
+<div class="row">
+  <!--Start of row-->
+  <div class="col-sm-6">
+    <!--Start of col-->
+    <div class="header">{{header}}</div>
+
+    <div class="display_table">
+      <form method='POST' action=''>{% csrf_token %}
+        {{form|crispy}}
+        <input class="btn btn-primary" type="submit" value='Save' />
+      </form>
+    </div>
+  </div>
+  <!--End of col-->
+</div>
+<!--End of row-->
 {% endblock body %}
