@@ -94,6 +94,23 @@ def stock_detail(request, pk):
 	}
 	return render(request, "storeApp/stock_detail.html", context)
 
+
+@login_required
+def reorder_level(request, pk):
+	queryset = Stock.objects.get(id=pk)
+	form = ReorderLevelForm(request.POST or None, instance=queryset)
+	if form.is_valid():
+		instance = form.save(commit=False)
+		instance.save()
+		messages.success(request, "Reorder level for " + str(instance.item_name) + " is updated to " + str(instance.reorder_level))
+
+		return redirect("storeApp:list_item")
+	context = {
+			"instance": queryset,
+			"form": form,
+		}
+	return render(request, "storeApp/add_items.html", context)
+
 @login_required
 def issue_items(request, pk):
 	queryset = Stock.objects.get(id=pk)
@@ -103,9 +120,9 @@ def issue_items(request, pk):
 		instance.quantity -= instance.issue_quantity
 		instance.issue_by = str(request.user)
 		instance.receive_quantity = 0
-		messages.success(request, "Issued SUCCESSFULLY. " + str(instance.quantity) + " " + str(instance.item_name) + "s now left in Store")
 		instance.save()
-
+		
+		messages.success(request, "Issued SUCCESSFULLY. " + str(instance.quantity) + " " + str(instance.item_name) + "s now left in Store")
 		return redirect('/stock_detail/'+str(instance.id))
 		# return HttpResponseRedirect(instance.get_absolute_url())
 
@@ -128,6 +145,7 @@ def receive_items(request, pk):
 		instance.receive_by = str(request.user)
 		instance.issue_quantity = 0
 		instance.save()
+		
 		messages.success(request, "Received SUCCESSFULLY. " + str(instance.quantity) + " " + str(instance.item_name)+"s now in Store")
 
 		return redirect('/stock_detail/'+str(instance.id))
@@ -140,26 +158,12 @@ def receive_items(request, pk):
 		}
 	return render(request, "storeApp/add_items.html", context)
 
-@login_required
-def reorder_level(request, pk):
-	queryset = Stock.objects.get(id=pk)
-	form = ReorderLevelForm(request.POST or None, instance=queryset)
-	if form.is_valid():
-		instance = form.save(commit=False)
-		instance.save()
-		messages.success(request, "Reorder level for " + str(instance.item_name) + " is updated to " + str(instance.reorder_level))
 
-		return redirect("storeApp:list_item")
-	context = {
-			"instance": queryset,
-			"form": form,
-		}
-	return render(request, "storeApp/add_items.html", context)
 
 @login_required
 def list_history(request):
 	header = 'HISTORY DATA'
-	queryset = StockHistory.objects.all()
+	queryset = StockHistory.objects.all().order_by('-last_updated')
 	form = StockHistorySearchForm(request.POST or None)
 	if request.method == 'POST':
 		category = form['category'].value()
@@ -207,3 +211,5 @@ def list_history(request):
 		"queryset": queryset,
 	}
 	return render(request, "storeApp/list_history.html",context)
+
+
